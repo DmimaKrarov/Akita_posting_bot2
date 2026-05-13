@@ -5,6 +5,9 @@ import xml.etree.ElementTree as ET
 
 import telebot
 
+import os
+from flask import Flask
+from threading import Thread
 
 # =========================
 # НАСТРОЙКИ
@@ -28,6 +31,46 @@ sent_videos = set()
 
 # Первый запуск
 initialized = False
+
+
+# ==========================================
+# 1. НАСТРОЙКА FLASK (ДЛЯ РАБОТЫ 24/7)
+# ==========================================
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return "Web server is running! Bot is alive."
+
+def run_flask():
+    # Render передает нужный порт через переменную окружения PORT.
+    # Если запустить на ПК, будет использован порт 8080.
+    port = int(os.environ.get("PORT", 8080))
+    # host='0.0.0.0' обязателен, чтобы Render увидел сервер извне
+    app.run(host='0.0.0.0', port=port)
+
+def keep_alive():
+    # Запускаем Flask в отдельном потоке, чтобы он не блокировал основной код бота
+    t = Thread(target=run_flask)
+    t.start()
+
+
+
+def start_bot():
+    print("Запускаю бота...")
+    # Вставьте сюда инициализацию бота, хендлеры и запуск
+    
+    # ПРИМЕР (раскомментируйте и замените на свой код):
+    # bot = telebot.TeleBot("ВАШ_ТОКЕН")
+    # 
+    # @bot.message_handler(commands=['start'])
+    # def start(message):
+    #     bot.send_message(message.chat.id, "Привет!")
+    #
+    # bot.polling(non_stop=True) 
+    
+    pass # Удалите pass, когда добавите свой код
+
 
 
 def fetch_feed():
@@ -135,5 +178,7 @@ def main():
 
 
 if __name__ == "__main__":
+    
+    keep_alive()
     main()
     
